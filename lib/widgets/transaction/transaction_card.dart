@@ -1,18 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-import '../models/transaction.dart';
+import '../../models/transaction.dart';
 
 class TransactionCard extends StatelessWidget {
   final Transaction _transaction;
-  const TransactionCard(this._transaction, {Key? key}) : super(key: key);
+  final Function _deleteTransaction;
+  const TransactionCard(this._transaction, this._deleteTransaction, {Key? key})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Card(
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: <Widget>[
+          const Spacer(flex: 1),
           Container(
             margin: const EdgeInsets.all(12),
             child: Text(
@@ -24,6 +26,7 @@ class TransactionCard extends StatelessWidget {
               ),
             ),
           ),
+          const Spacer(flex: 1),
           Container(
             margin: const EdgeInsets.all(3),
             child: Column(
@@ -54,6 +57,27 @@ class TransactionCard extends StatelessWidget {
               ],
             ),
           ),
+          const Spacer(flex: 1),
+          MediaQuery.of(context).size.width > 400
+              ? ElevatedButton(
+                  onPressed: () => _deleteTransaction(_transaction.id),
+                  child: Row(
+                    children: const [
+                      Text(
+                        'delete',
+                      ),
+                      Icon(Icons.delete),
+                    ],
+                  ),
+                  style: ButtonStyle(
+                      backgroundColor: MaterialStateProperty.all(Colors.white),
+                      foregroundColor: MaterialStateProperty.all(
+                          Theme.of(context).errorColor)))
+              : IconButton(
+                  onPressed: () => _deleteTransaction(_transaction.id),
+                  icon: const Icon(Icons.delete),
+                  color: Theme.of(context).errorColor,
+                )
         ],
       ),
       elevation: 5,

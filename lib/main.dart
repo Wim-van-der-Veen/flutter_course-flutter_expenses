@@ -1,11 +1,18 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 
 import './models/transaction.dart';
-import './widgets/transaction_new.dart';
-import './widgets/transaction_chart.dart';
-import './widgets/transaction_list.dart';
+import './widgets/transaction/transaction_new.dart';
+import './widgets/transaction/transaction_chart.dart';
+import './widgets/transaction/transaction_list.dart';
 
 void main() {
+  // WidgetsFlutterBinding.ensureInitialized();
+  // SystemChrome.setPreferredOrientations([
+  //   DeviceOrientation.portraitUp,
+  //   DeviceOrientation.portraitDown,
+  // ]);
   runApp(MyApp());
 }
 
@@ -57,8 +64,24 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   final List<Transaction> _userTransactions = [
-    // Transaction(id: '1', title: 'item 1', amount: 12.34, date: DateTime.now()),
-    // Transaction(id: '2', title: 'item 2', amount: 13.57, date: DateTime.now()),
+    Transaction(
+      id: '1',
+      title: 'item 1',
+      amount: 12.34,
+      date: DateTime.now().subtract(const Duration(days: 3)),
+    ),
+    Transaction(
+      id: '2',
+      title: 'item 2',
+      amount: 13.57,
+      date: DateTime.now().subtract(const Duration(days: 5)),
+    ),
+    Transaction(
+      id: '3',
+      title: 'item 3',
+      amount: 98.76,
+      date: DateTime.now().subtract(const Duration(days: 8)),
+    ),
   ];
 
   final Icon _actionIcon = const Icon(Icons.add);
@@ -68,7 +91,7 @@ class _MyHomePageState extends State<MyHomePage> {
       context: context,
       builder: (_) {
         return GestureDetector(
-          child: TransactionNew(_addNewTransaction),
+          child: TransactionNew(_addTransaction),
           onTap: () {},
           behavior: HitTestBehavior.opaque,
         );
@@ -76,11 +99,11 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  void _addNewTransaction(String title, double amount) {
+  void _addTransaction(String title, double amount, DateTime date) {
     final newTransaction = Transaction(
       amount: amount,
       title: title,
-      date: DateTime.now(),
+      date: date,
       id: _userTransactions.length.toString(),
     );
     setState(() {
@@ -88,34 +111,55 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
+  void _deleteTransaction(String id) {
+    setState(() {
+      _userTransactions
+          .removeWhere((Transaction transaction) => transaction.id == id);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-          'FlutterExpenses Home',
-        ),
-        actions: <Widget>[
-          IconButton(
-            onPressed: () => _startAddNewTransaction(context),
-            icon: _actionIcon,
-          ),
-        ],
+    var appBar = AppBar(
+      title: const Text(
+        'FlutterExpenses Home',
       ),
+      actions: <Widget>[
+        IconButton(
+          onPressed: () => _startAddNewTransaction(context),
+          icon: _actionIcon,
+        ),
+      ],
+    );
+    var chart = TransactionChart(_userTransactions);
+
+    return Scaffold(
+      appBar: appBar,
       body: SingleChildScrollView(
         child: Column(
           children: [
-            TransactionChart(_userTransactions),
-            TransactionList(_userTransactions),
+            chart,
+            TransactionList(
+              _userTransactions,
+              _deleteTransaction,
+              MediaQuery.of(context).padding.top +
+                  MediaQuery.of(context).padding.bottom +
+                  appBar.preferredSize.height +
+                  (TransactionChart.of(context) == null
+                      ? 0.0
+                      : TransactionChart.of(context)!.height),
+            ),
           ],
         ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => _startAddNewTransaction(context),
-        child: _actionIcon,
-        backgroundColor: Theme.of(context).colorScheme.primary,
-      ),
+      floatingActionButton: Platform.isIOS
+          ? Container()
+          : FloatingActionButton(
+              onPressed: () => _startAddNewTransaction(context),
+              child: _actionIcon,
+              backgroundColor: Theme.of(context).colorScheme.primary,
+            ),
     );
   }
 }
