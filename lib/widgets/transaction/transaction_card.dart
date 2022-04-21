@@ -58,7 +58,7 @@ class TransactionCard extends StatelessWidget {
             ),
           ),
           const Spacer(flex: 1),
-          MediaQuery.of(context).size.width > 400
+          MediaQuery.of(context).size.width > 500
               ? ElevatedButton(
                   onPressed: () => _deleteTransaction(_transaction.id),
                   child: Row(

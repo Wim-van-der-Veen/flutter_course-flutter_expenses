@@ -120,10 +120,27 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    var appBar = AppBar(
-      title: const Text(
-        'FlutterExpenses Home',
+    final mediaQuery = MediaQuery.of(context);
+    final isLandscape = mediaQuery.orientation == Orientation.landscape;
+
+    const title = Text(
+      'FlutterExpenses Home',
+    );
+
+    final ObstructingPreferredSizeWidget appBarIos = CupertinoNavigationBar(
+      middle: title,
+      trailing: Row(
+        children: <Widget>[
+          GestureDetector(
+            onTap: () => _startAddNewTransaction(context),
+            child: const Icon(CupertinoIcons.add),
+          ),
+        ],
+        mainAxisSize: MainAxisSize.min,
       ),
+    );
+    final PreferredSizeWidget appBarAndroid = AppBar(
+      title: title,
       actions: <Widget>[
         IconButton(
           onPressed: () => _startAddNewTransaction(context),
@@ -131,19 +148,19 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
       ],
     );
-    var chart = TransactionChart(_userTransactions);
-
-    return Scaffold(
-      appBar: appBar,
-      body: SingleChildScrollView(
+    final PreferredSizeWidget appBar =
+        Platform.isIOS ? appBarIos : appBarAndroid;
+    final chart = TransactionChart(_userTransactions, isLandscape);
+    final body = SafeArea(
+      child: SingleChildScrollView(
         child: Column(
           children: [
             chart,
             TransactionList(
               _userTransactions,
               _deleteTransaction,
-              MediaQuery.of(context).padding.top +
-                  MediaQuery.of(context).padding.bottom +
+              mediaQuery.padding.top +
+                  mediaQuery.padding.bottom +
                   appBar.preferredSize.height +
                   (TransactionChart.of(context) == null
                       ? 0.0
@@ -152,14 +169,23 @@ class _MyHomePageState extends State<MyHomePage> {
           ],
         ),
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-      floatingActionButton: Platform.isIOS
-          ? Container()
-          : FloatingActionButton(
+    );
+
+    return Platform.isIOS
+        ? CupertinoPageScaffold(
+            child: body,
+            navigationBar: appBarIos,
+          )
+        : Scaffold(
+            appBar: appBarAndroid,
+            body: body,
+            floatingActionButtonLocation:
+                FloatingActionButtonLocation.centerFloat,
+            floatingActionButton: FloatingActionButton(
               onPressed: () => _startAddNewTransaction(context),
               child: _actionIcon,
               backgroundColor: Theme.of(context).colorScheme.primary,
             ),
-    );
+          );
   }
 }

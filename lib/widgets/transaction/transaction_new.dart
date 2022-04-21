@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+import '../general/adaptive_button.dart';
+
 class TransactionNew extends StatefulWidget {
   final Function _handleNew;
   const TransactionNew(this._handleNew, {Key? key}) : super(key: key);
@@ -71,7 +73,7 @@ class _TransactionNewState extends State<TransactionNew> {
                 onSubmitted: (_) => submitData(),
                 // onChanged: _onChangedAmount,
               ),
-              TextButton(
+              AdaptiveButton(
                 child: Row(
                     children: _selectedDate == null
                         ? <Widget>[
@@ -99,10 +101,10 @@ class _TransactionNewState extends State<TransactionNew> {
                       ),
                 onPressed: () => _showDatePicker(context),
               ),
-              TextButton(
+              AdaptiveButton(
                 child: const Text('Add Transaction'),
-                style: TextButton.styleFrom(primary: Colors.purple),
                 onPressed: submitData,
+                style: TextButton.styleFrom(primary: Colors.purple),
               ),
             ],
           ),

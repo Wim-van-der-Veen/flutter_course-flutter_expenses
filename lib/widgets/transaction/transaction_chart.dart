@@ -10,8 +10,9 @@ class TransactionChart extends StatefulWidget {
 
   final List<Transaction> _weekTransactions;
   final double _weekTotal;
+  final bool isLandscape;
 
-  TransactionChart._latest(start, transactions, {Key? key})
+  TransactionChart._latest(start, transactions, this.isLandscape, {Key? key})
       : _weekTransactions = List.generate(
           7,
           (index) {
@@ -35,7 +36,7 @@ class TransactionChart extends StatefulWidget {
             (current, Transaction transaction) => current + transaction.amount),
         super(key: key);
 
-  TransactionChart._start(start, transactions, {Key? key})
+  TransactionChart._start(start, transactions, isLandscape, {Key? key})
       : this._latest(
             start,
             transactions
@@ -43,17 +44,19 @@ class TransactionChart extends StatefulWidget {
                     transaction.date.millisecondsSinceEpoch >=
                     start.millisecondsSinceEpoch)
                 .toList(),
+            isLandscape,
             key: key);
 
-  TransactionChart._now(now, transactions, {Key? key})
+  TransactionChart._now(now, transactions, isLandscape, {Key? key})
       : this._start(
             DateTime(now.year, now.month, now.day)
                 .subtract(const Duration(days: 6)),
             transactions,
+            isLandscape,
             key: key);
 
-  TransactionChart(transactions, {Key? key})
-      : this._now(DateTime.now(), transactions, key: key);
+  TransactionChart(transactions, isLandscape, {Key? key})
+      : this._now(DateTime.now(), transactions, isLandscape, key: key);
 
   @override
   State<TransactionChart> createState() => _TransactionChartState();
@@ -81,7 +84,7 @@ class _TransactionChartState extends State<TransactionChart> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
-            ...(_showChart
+            ...((_showChart || !widget.isLandscape)
                 ? [
                     ...widget._weekTransactions
                         .map((transaction) => Flexible(
@@ -92,19 +95,21 @@ class _TransactionChartState extends State<TransactionChart> {
                                   '€ ${transaction.amount.toStringAsFixed(2)}'),
                             ))
                         .toList(),
-                    const Spacer(),
+                    !widget.isLandscape ? Container() : const Spacer(),
                   ]
                 : []),
-            RotatedBox(
-              quarterTurns: 3,
-              child: SizedBox(
-                height: 20,
-                child: Switch(
-                  value: _showChart,
-                  onChanged: _toggleChart,
-                ),
-              ),
-            ),
+            !widget.isLandscape
+                ? Container()
+                : RotatedBox(
+                    quarterTurns: 3,
+                    child: SizedBox(
+                      height: 20,
+                      child: Switch.adaptive(
+                        value: _showChart,
+                        onChanged: _toggleChart,
+                      ),
+                    ),
+                  ),
           ],
         ),
         // child: Text(
